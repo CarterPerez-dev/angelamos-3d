@@ -1,0 +1,43 @@
+{
+  "name": "angela-3d",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Angela 3D AI Assistant — Voice-activated 3D avatar powered by local AI",
+  "scripts": {
+    "setup": "npm run env && npm run build && npm run start && npm run pull",
+    "env": "test -f .env || cp .env.example .env",
+
+    "up": "docker compose up -d && docker compose logs -f",
+    "start": "docker compose up -d",
+    "down": "docker compose down",
+    "stop": "docker compose stop",
+    "build": "docker compose build",
+    "rebuild": "docker compose build --no-cache",
+    "logs": "docker compose logs -f",
+    "logs:backend": "docker compose logs -f backend",
+    "logs:frontend": "docker compose logs -f frontend",
+    "logs:ollama": "docker compose logs -f ollama",
+    "ps": "docker compose ps",
+    "restart": "docker compose restart",
+    "shell": "docker compose exec -it backend /bin/bash",
+
+    "pull": "docker compose exec ollama ollama pull ${OLLAMA_MODEL:-qwen2.5:7b}",
+    "ollama:models": "docker compose exec ollama ollama list",
+
+    "ruff": "cd backend && uv run ruff check .",
+    "ruff:fix": "cd backend && uv run ruff check . --fix && uv run ruff format .",
+    "mypy": "cd backend && uv run mypy app",
+    "biome": "cd frontend && pnpm biome check .",
+    "biome:fix": "cd frontend && pnpm biome check --write .",
+    "stylelint": "cd frontend && pnpm stylelint '**/*.scss'",
+    "stylelint:fix": "cd frontend && pnpm stylelint '**/*.scss' --fix",
+    "tsc": "cd frontend && pnpm tsc --noEmit",
+    "lint": "npm run ruff && npm run mypy && npm run biome && npm run tsc && npm run stylelint",
+    "check": "npm run ruff && npm run mypy && npm run tsc",
+
+    "health": "curl -sf http://localhost:${PORT:-7200}/health && echo ' healthy' || echo ' unhealthy'",
+
+    "clean": "rm -rf backend/.mypy_cache backend/.pytest_cache backend/.ruff_cache frontend/node_modules/.vite",
+    "nuke": "docker compose down -v --rmi local"
+  }
+}

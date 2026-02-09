@@ -1,0 +1,7 @@
+// ===================
+// © AngelaMos | 2026
+// index.ts
+// ===================
+
+export * from "./AudioRecorder";
+export * from "./SilenceDetector";
