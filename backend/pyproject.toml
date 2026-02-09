@@ -1,0 +1,100 @@
+[project]
+name = "angela-backend"
+version = "0.1.0"
+description = "Backend for Angela 3D AI Assistant"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "fastapi>=0.128.5",
+    "uvicorn[standard]>=0.40.0",
+    "pydantic-settings>=2.12.0",
+    "python-multipart>=0.0.22",
+    "httpx>=0.28.1",
+    "edge-tts>=7.2.7",
+    "faster-whisper>=1.2.1",
+    "openwakeword>=0.6.0",
+    "numpy>=1.26.0,<2.0",
+    "scipy>=1.17.0",
+    "websockets>=16.0",
+    "nvidia-cublas-cu12",
+    "nvidia-cudnn-cu12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.0.0",
+    "httpx>=0.28.1",
+    "aiosqlite>=0.22.1",
+    "asgi-lifespan>=2.1.0",
+    "mypy>=1.19.1",
+    "ruff>=0.15.0",
+    "ty>=0.0.15",
+]
+
+
+[tool.ruff]
+line-length = 79
+target-version = "py311"
+src = ["app"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "ARG",    # flake8-unused-arguments
+    "SIM",    # flake8-simplify
+    "PTH",    # flake8-use-pathlib
+    "RUF",    # ruff-specific
+    "ASYNC",  # flake8-async
+    "S",      # flake8-bandit (security)
+    "N",      # pep8-naming
+]
+ignore = [
+    "E501",     # line too long (formatter handles this)
+    "B008",     # function call in default argument (FastAPI Depends)
+    "S101",     # assert usage (needed for tests)
+    "S104",     # 0.0.0.0 binding (intentional for Docker)
+    "S105",     # "bearer" token_type is not a password
+    "ARG001",   # unused function argument (common in FastAPI deps)
+    "E712",     # == False is REQUIRED for SQLAlchemy WHERE clauses
+    "N999",     # PascalCase module names (intentional: Base.py, User.py)
+    "N818",     # exception naming convention (style preference)
+    "UP046",    # Generic[T] syntax (keep for compatibility)
+    "RUF005",   # list concatenation style (preference)
+]
+
+
+[tool.mypy]
+python_version = "3.11"
+namespace_packages = true
+explicit_package_bases = true
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*", "conftest"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "openwakeword.*",
+    "edge_tts.*",
+    "faster_whisper.*",
+    "scipy.*",
+    "ctranslate2.*",
+]
+ignore_missing_imports = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
