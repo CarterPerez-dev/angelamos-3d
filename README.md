@@ -2,7 +2,7 @@
 
 <div align="center">
 
-```
+```regex
       d8888                        888         .d8888b. 8888888b.
      d88888                        888        d88P  Y88b888  "Y88b
     d88P888                        888             .d88P888    888
@@ -13,7 +13,7 @@ d8888888888888  888Y88b 888Y8b.    888888  888Y88b  d88P888  .d88P
 d88P     888888  888 "Y88888 "Y8888 888"Y888888 "Y8888P" 8888888P"
                         888
                    Y8b d88P
-                    "Y88P"
+                     Y88P
 ```
 
 **A 3D avatar AI assistant with voice activation, lip sync, and real-time animations.**
@@ -125,4 +125,4 @@ See [ROADMAP.md](./ROADMAP.md) for the full plan — provider flexibility, memor
 
 ## License
 
-MIT
+AGPL 3.0

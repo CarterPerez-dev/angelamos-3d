@@ -4,8 +4,8 @@
 
 set -euo pipefail
 
-REPO="https://github.com/AngelaMos/angelamos-3d.git"
-INSTALL_DIR="${ANGELA_INSTALL_DIR:-$HOME/angela-3d}"
+REPO="https://github.com/CarterPerez-dev/angelamos-3d.git"
+INSTALL_DIR="${ANGELA_INSTALL_DIR:-$(pwd)/angela-3d}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -34,7 +34,7 @@ prompt_yn() {
 
 prompt_val() {
     local msg="$1" default="$2"
-    echo -en "  ${BOLD}$msg [${default}]:${NC} "
+    echo -en "  ${CYAN}>${NC} ${BOLD}$msg${NC} ${DIM}(default: ${default})${NC}: " >&2
     read -r ans
     echo "${ans:-$default}"
 }
@@ -42,11 +42,11 @@ prompt_val() {
 echo -e "${BOLD}${CYAN}"
 cat << 'EOF'
 
-     _                _       __  __
-    / \   _ __   __ _| | __ _|  \/  | ___  ___
-   / _ \ | '_ \ / _` | |/ _` | |\/| |/ _ \/ __|
-  / ___ \| | | | (_| | | (_| | |  | | (_) \__ \
- /_/   \_|_| |_|\__, |_|\__,_|_|  |_|\___/|___/
+     _                     _         _____ ____  
+    / \   _ __   __ _  ___| | __ _  |___ /|  _ \ 
+   / _ \ | '_ \ / _` |/ _ \ |/ _` |   |_ \| | | |
+  / ___ \| | | | (_| |  __/ | (_| |  ___) | |_| |
+ /_/   \_\_| |_|\__, |\___|_|\__,_| |____/|____/ 
                 |___/
 EOF
 echo -e "${NC}"
@@ -198,16 +198,16 @@ info "Working in $INSTALL_DIR"
 
 header "Choose a model"
 
-echo "  ${DIM}Smaller = faster + less VRAM, larger = smarter${NC}"
+echo -e "  ${DIM}Smaller = faster + less VRAM, larger = smarter${NC}"
 echo ""
-echo "  1)  qwen2.5:3b     ~2 GB     Lightweight"
-echo "  2)  qwen2.5:7b     ~4.5 GB   Recommended"
-echo "  3)  qwen2.5:14b    ~9 GB     Higher quality"
-echo "  4)  qwen2.5:32b    ~20 GB    Best quality"
-echo "  5)  Custom"
+echo -e "  ${BOLD}1)${NC}  qwen2.5:3b     ~2 GB     Lightweight"
+echo -e "  ${BOLD}2)${NC}  qwen2.5:7b     ~4.5 GB   ${GREEN}Recommended${NC}"
+echo -e "  ${BOLD}3)${NC}  qwen2.5:14b    ~9 GB     Higher quality"
+echo -e "  ${BOLD}4)${NC}  qwen2.5:32b    ~20 GB    Best quality"
+echo -e "  ${BOLD}5)${NC}  Custom"
 echo ""
 
-MODEL_CHOICE=$(prompt_val "Select" "2")
+MODEL_CHOICE=$(prompt_val "Pick a model (1-5)" "2")
 
 case "$MODEL_CHOICE" in
     1) OLLAMA_MODEL="qwen2.5:3b" ;;
@@ -232,8 +232,7 @@ cp .env.example .env
 
 sed -i "s|^OLLAMA_MODEL=.*|OLLAMA_MODEL=$OLLAMA_MODEL|" .env
 
-PORT_CHOICE=$(prompt_val "Port" "7200")
-sed -i "s|^PORT=.*|PORT=$PORT_CHOICE|" .env
+PORT_CHOICE="7200"
 
 if [[ "$GPU_MODE" == "cpu" ]]; then
     echo "COMPOSE_FILE=compose.cpu.yml" >> .env
@@ -245,6 +244,7 @@ fi
 info "Port: $PORT_CHOICE"
 info "Model: $OLLAMA_MODEL"
 info ".env written"
+echo -e "  ${DIM}Edit .env to change port or other settings${NC}"
 
 # =========================================================================
 # Optional: Local Linting Tools
@@ -254,7 +254,7 @@ echo ""
 if prompt_yn "Install local linting tools? (dev only, not needed to run)" "n"; then
     if command -v uv &>/dev/null; then
         info "Installing backend dev dependencies..."
-        (cd backend && uv sync --group dev)
+        (cd backend && uv sync --extra dev)
     else
         warn "uv not found — skipping backend linting tools"
     fi
@@ -286,15 +286,16 @@ docker compose up -d
 
 info "Waiting for Ollama to be ready..."
 TRIES=0
-until docker compose exec ollama ollama list &>/dev/null 2>&1; do
-    sleep 2
+until [[ "$(docker inspect --format='{{.State.Health.Status}}' "$(docker compose ps -q ollama)" 2>/dev/null)" == "healthy" ]]; do
+    sleep 3
     TRIES=$((TRIES + 1))
-    if [[ $TRIES -ge 60 ]]; then
-        fail "Ollama did not start within 2 minutes"
+    if [[ $TRIES -ge 40 ]]; then
+        fail "Ollama did not become healthy within 2 minutes"
         warn "Try: docker compose logs ollama"
         exit 1
     fi
 done
+info "Ollama is up"
 
 info "Pulling $OLLAMA_MODEL (this may take a while)..."
 docker compose exec ollama ollama pull "$OLLAMA_MODEL"
